@@ -143,7 +143,7 @@ class UrlAnalyzer {
       $rel = @$attributes['rel']['value'];
       if ($rel != 'alternate')
         $this->reportFoundUrl($url, @$attributes['href']['value']);
-    } else if ($tag_name == 'image'){
+    } else if ($tag_name == 'img'){
       // images in the web page
       $this->reportFoundUrl($url, @$attributes['src']['value']);
     }
