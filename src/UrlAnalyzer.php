@@ -63,6 +63,11 @@ class UrlAnalyzer {
         if ($i == 0)
           throw new \Exception('This URL is returning a 4xx error, cannot continue');
         continue;
+      } catch (\Exception $e){
+        // other errors such as garbage URLs
+        if ($i == 0)
+          throw new \Exception('This URL is not reachable, cannot continue');
+        continue;
       }
 
       if ($response->hasHeader('Content-Type'))
@@ -120,14 +125,15 @@ class UrlAnalyzer {
   private function findUrlsInNode($url, $node){
     // iterate over siblings
     do {
-      // recursively process children
-      if ( $node->hasChildren() ){
-        $this->findUrlsInNode($url, $node->firstChild());
-      }
-
       // get properties of this node
       $tag_name = $node->getTag()->name();
       $attributes = $node->getTag()->getAttributes();
+
+      // recursively process children
+      // do not check children of script tags that might be html in a JS string and actually not part of the DOM
+      if ( $node->hasChildren() && $tag_name != 'script'){
+        $this->findUrlsInNode($url, $node->firstChild());
+      }
 
       // note: we do not include object, embed, audio, or video
       // because those resources are not typically not loaded automatically with the web page
