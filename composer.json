@@ -1,0 +1,10 @@
+{
+  "autoload": {
+    "psr-4": { "HttpRequestSize\\": "src/" }
+  },
+  "require": {
+    "guzzlehttp/guzzle": "6.0.2",
+    "paquettg/php-html-parser": "^1.6",
+    "pear/net_url2": "^2.2"
+  }
+}
