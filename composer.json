@@ -3,6 +3,7 @@
     "psr-4": { "HttpRequestSize\\": "src/" }
   },
   "require": {
+    "php": ">=5.5.0",
     "guzzlehttp/guzzle": "6.0.2",
     "paquettg/php-html-parser": "^1.6",
     "pear/net_url2": "^2.2"
