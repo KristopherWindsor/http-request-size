@@ -19,7 +19,7 @@ class Application {
     try {
       $analyzer = new UrlAnalyzer($url);
       $stats = $analyzer->getStats();
-    } catch (Exception $e){
+    } catch (\Exception $e){
       die("Unexpected error: " . $e->getMessage() . "\n");
     }
 
