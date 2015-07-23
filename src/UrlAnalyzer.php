@@ -59,6 +59,9 @@ class UrlAnalyzer {
       } catch (\GuzzleHttp\Exception\ClientException $e){
         // 4xx (probably 404) errors
         // if the resource is missing, there is nothing to report about it
+        // but if this is the main URL (rather than a dependency, should expose that issue)
+        if ($i == 0)
+          throw new \Exception('This URL is returning a 4xx error, cannot continue');
         continue;
       }
 
