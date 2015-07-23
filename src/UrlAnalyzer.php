@@ -118,38 +118,44 @@ class UrlAnalyzer {
    * This recursively checks child/sibling nodes.
    */
   private function findUrlsInNode($url, $node){
-    // recursively process children and siblings
-    try {
-      $this->findUrlsInNode($url, $node->nextSibling());
-    } catch (\PHPHtmlParser\Exceptions\ChildNotFoundException $e) {
-    }
-    if ( $node->hasChildren() ){
-      $this->findUrlsInNode($url, $node->firstChild());
-    }
+    // iterate over siblings
+    do {
+      // recursively process children
+      if ( $node->hasChildren() ){
+        $this->findUrlsInNode($url, $node->firstChild());
+      }
 
-    // get properties of this node
-    $tag_name = $node->getTag()->name();
-    $attributes = $node->getTag()->getAttributes();
+      // get properties of this node
+      $tag_name = $node->getTag()->name();
+      $attributes = $node->getTag()->getAttributes();
 
-    // note: we do not include object, embed, audio, or video
-    // because those resources are not typically not loaded automatically with the web page
+      // note: we do not include object, embed, audio, or video
+      // because those resources are not typically not loaded automatically with the web page
 
-    if ($tag_name == 'iframe'){
-      // iframes
-      $this->reportFoundUrl($url, @$attributes['src']['value']);
-    } else if ($tag_name == 'script'){
-      // js references
-      $this->reportFoundUrl($url, @$attributes['src']['value']);
-    } else if ($tag_name == 'link'){
-      // css, favicon, etc references
-      // alternates are not dependencies
-      $rel = @$attributes['rel']['value'];
-      if ($rel != 'alternate')
-        $this->reportFoundUrl($url, @$attributes['href']['value']);
-    } else if ($tag_name == 'img'){
-      // images in the web page
-      $this->reportFoundUrl($url, @$attributes['src']['value']);
-    }
+      if ($tag_name == 'iframe'){
+        // iframes
+        $this->reportFoundUrl($url, @$attributes['src']['value']);
+      } else if ($tag_name == 'script'){
+        // js references
+        $this->reportFoundUrl($url, @$attributes['src']['value']);
+      } else if ($tag_name == 'link'){
+        // css, favicon, etc references
+        // alternates are not dependencies
+        $rel = @$attributes['rel']['value'];
+        if ($rel != 'alternate')
+          $this->reportFoundUrl($url, @$attributes['href']['value']);
+      } else if ($tag_name == 'img'){
+        // images in the web page
+        $this->reportFoundUrl($url, @$attributes['src']['value']);
+      }
+
+      try {
+        $node = $node->nextSibling();
+      } catch (\PHPHtmlParser\Exceptions\ChildNotFoundException $e) {
+        // there are no more siblings
+        $node = null;
+      }
+    } while ($node);
   }
 
   /* This handles the case where an asset reference is found in the DOM for a web page.
