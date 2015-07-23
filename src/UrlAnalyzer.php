@@ -2,6 +2,9 @@
 
 namespace HttpRequestSize;
 
+/* Take a URL, hit it and its dependencies (if URL is a web page), and provide stats:
+ * number of requests and size of requests per type (ie image, CSS)
+ */
 class UrlAnalyzer {
 
   private $guzzle_client;
@@ -12,15 +15,17 @@ class UrlAnalyzer {
   private $promises = [];
   private $promises_total = 0;
 
-  private $stats = null;
-  private $stats_recorded = []; // all urls for which stats have been recorded
+  private $stats = [];
+  private $stats_recorded = [];       // all urls for which stats have been recorded
 
+  /* @param string $url a complete (absolute) URL to work with.
+   */
   public function __construct($url){
     $this->guzzle_client = new \GuzzleHttp\Client();
     $this->queueUrl($url);
   }
 
-  /* Add to the queue of urls to visit via HEAD request
+  /* Add to the queue of URLs to visit via HEAD request.
    */
   private function queueUrl($url){
     if (isset($this->all_visited[$url]))
@@ -29,7 +34,8 @@ class UrlAnalyzer {
     $this->promises[$this->promises_total++] = [$url, $this->guzzle_client->headAsync($url)];
   }
 
-  /* Add to the queue of urls to visit via GET request
+  /* Add to the queue of URLs to visit via GET request.
+   * We only do this for HTML endpoints and endpoints where Content-Length is not specified.
    */
   private function queueCompleteUrl($url){
     if (empty($this->all_visited[$url]))
@@ -41,8 +47,9 @@ class UrlAnalyzer {
     $this->promises[$this->promises_total++] = [$url, $this->guzzle_client->getAsync($url)];
   }
 
-  /* Process (hit) all urls in the queue.
+  /* Process (hit) all URLs in the queue.
    * If we find web pages in the queue, we will add their dependencies to the queue, so they will be processed too.
+   * This uses Guzzle async requests so dependencies can be hit in parallel.
    */
   private function processQueue(){
     for ($i = 0; $i < $this->promises_total; $i++){
@@ -82,6 +89,9 @@ class UrlAnalyzer {
     $this->promises = [];
   }
 
+  /* Accept HTML (as a string), parse the DOM,
+   * and check the DOM elements in order to find references to other assets.
+   */
   private function findUrlsInHtml($url, $html){
     if (!$html)
       return;
@@ -95,6 +105,9 @@ class UrlAnalyzer {
     }
   }
 
+  /* For a DOM element, check its name/attrs to see if it references dependencies.
+   * This recursively checks child/sibling nodes.
+   */
   private function findUrlsInNode($url, $node){
     // recursively process children and siblings
     try {
@@ -130,8 +143,8 @@ class UrlAnalyzer {
     }
   }
 
-  /* This handles the case where an asset reference is found in the dom for a web page.
-   * It needs to resolve relative urls and add the url to the queue
+  /* This handles the case where an asset reference is found in the DOM for a web page.
+   * It needs to resolve relative URLs and add the URL to the queue.
    */
   private function reportFoundUrl($base_url, $relative){
     // skip in case the src/href attribute is missing
@@ -143,6 +156,9 @@ class UrlAnalyzer {
     $this->queueUrl($absolute_url);
   }
 
+  /* For a given URL, after the Content-Type and size is determined, store those stats.
+   * Stats are aggregated per content category.
+   */
   private function recordStats($url, $category, $size){
     if (isset($this->stats_recorded[$url]))
       return;
@@ -155,6 +171,8 @@ class UrlAnalyzer {
     $this->stats[$category]['size'] += $size;
   }
 
+  /* Get stats - the URLs will be processed the first time this is called.
+   */
   public function getStats(){
     $this->processQueue();
     return $this->stats;

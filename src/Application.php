@@ -3,7 +3,7 @@
 namespace HttpRequestSize;
 
 /* This class runs the application: it gets parameters from command line
- * and writes directly to stdOut rather than being extensible
+ * and writes directly to stdOut rather than being extensible.
  */
 class Application {
   public function __construct($argc, $argv){

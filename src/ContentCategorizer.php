@@ -2,6 +2,8 @@
 
 namespace HttpRequestSize;
 
+/* Defines an arbitrary enumeration of content types for URLs.
+ */
 class ContentCategorizer {
   const ASSET = 'ASSET';
   const CSS   = 'CSS';
@@ -9,7 +11,7 @@ class ContentCategorizer {
   const IMAGE = 'IMAGE';
   const JS    = 'JS';
 
-  /* Categorize a web resource based on its Content-Type.
+  /* Categorizes a web resource based on its Content-Type.
    * This logic is heuristical as we do not list out all of the Content-Types for each category.
    * The categories are arbitrary.
    */
@@ -28,6 +30,8 @@ class ContentCategorizer {
     return self::ASSET;
   }
 
+  /* Provides a list of all content types and a display name for each.
+   */
   public static function getAllTypes(){
     return [
       self::HTML  => 'Web pages (HTML)',

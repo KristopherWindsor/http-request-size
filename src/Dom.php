@@ -2,7 +2,7 @@
 
 namespace HttpRequestSize;
 
-/* Change the third-party Dom class to not strip out <script> tags in clean()
+/* Changes the third-party Dom class to not strip out <script> tags in clean().
  */
 class Dom extends \PHPHtmlParser\Dom {
   protected function clean($str)
