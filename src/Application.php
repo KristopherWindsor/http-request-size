@@ -14,6 +14,8 @@ class Application {
     if (strpos($url, '://') === false)
       $url = 'http://' . $url;
 
+    printf( "Processed URL: %s\n\n", $url );
+
     try {
       $analyzer = new UrlAnalyzer($url);
       $stats = $analyzer->getStats();
@@ -27,8 +29,6 @@ class Application {
       $total_req += $stat['requests'];
       $total_size += $stat['size'];
     }
-
-    printf( "Processed URL: %s\n\n", $url );
 
     printf( "Total number of HTTP requests: %d\n", $total_req );
     printf( "Total download size for all requests: %s bytes\n\n", number_format($total_size) );
