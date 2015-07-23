@@ -30,6 +30,13 @@ class Application {
       $total_size += $stat['size'];
     }
 
+    if ($total_req > 1)
+      $this->showDetails($total_req, $total_size, $stats);
+    else
+      $this->showSimple($total_req, $total_size, $stats);
+  }
+
+  private function showDetails($total_req, $total_size, $stats){
     printf( "Total number of HTTP requests: %d\n", $total_req );
     printf( "Total download size for all requests: %s bytes\n\n", number_format($total_size) );
 
@@ -41,6 +48,15 @@ class Application {
           number_format($stats[$type]['size']) );
       else
         printf( "%s 0 requests\n", substr($display_name . str_repeat('.', 20), 0, 20) );
+    }
+  }
+
+  private function showSimple($total_req, $total_size, $stats){
+    foreach (ContentCategorizer::getAllTypes() as $type => $display_name){
+      if (isset($stats[$type])){
+        printf( "This %s document is %s bytes\n", $display_name, number_format($total_size) );
+        break;
+      }
     }
   }
 }
