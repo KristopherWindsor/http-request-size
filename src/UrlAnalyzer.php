@@ -54,7 +54,13 @@ class UrlAnalyzer {
   private function processQueue(){
     for ($i = 0; $i < $this->promises_total; $i++){
       list($url, $promise) = $this->promises[$i];
-      $response = $promise->wait();
+      try {
+        $response = $promise->wait();
+      } catch (\GuzzleHttp\Exception\ClientException $e){
+        // 4xx (probably 404) errors
+        // if the resource is missing, there is nothing to report about it
+        continue;
+      }
 
       if ($response->hasHeader('Content-Type'))
         $content_type = $response->getHeader('Content-Type')[0];
